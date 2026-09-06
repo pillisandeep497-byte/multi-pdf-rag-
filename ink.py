@@ -12,6 +12,8 @@ import streamlit as st
 load_dotenv()
 
 
+
+api_key = st.secrets["OPENROUTER_API_KEY"]
 st.title("MULTI-PDF-RAG-BOT")
 pdf=[
     "RAG/sample3.pdf",
@@ -71,7 +73,7 @@ Question:
 
 llm=ChatOpenRouter(
     model="gpt-oss-20b",
-    openrouter_api_key=os.getenv("OPENROUTER_API_KEY"),
+    openrouter_api_key=api_key,
     temperature=0
 
 )
