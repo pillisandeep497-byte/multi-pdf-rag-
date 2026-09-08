@@ -80,8 +80,8 @@ document_chain=create_stuff_documents_chain(
     llm,
     prompt
 )
-retrievar_chain=create_retrieval_chain(
-    retrievar,
+retriever_chain=create_retrieval_chain(
+    retriever,
     document_chain
 )
 if "messages" not in st.session_state:
@@ -110,7 +110,7 @@ if user_input:
     
 
 
-                response=retrievar_chain.invoke(
+                response=retriever_chain.invoke(
             {"input":user_input}
                 )
                 
