@@ -15,45 +15,43 @@ load_dotenv()
 
 api_key = st.secrets["OPENROUTER_API_KEY"]
 st.title("MULTI-PDF-RAG-BOT")
-pdf=[
-    "RAG/sample3.pdf",
-    "RAG/sample4.pdf"
-]
+@st.cache_resource
+def create_vector_store():
+    pdf = ["RAG/sample3.pdf","RAG/sample4.pdf"]
+    documents=[]
+    for i in pdf:
+        loader=PyPDFLoader(i)
+        doc=loader.load()
 
-documents=[]
+        for j in doc:
+            j.metadata["source"]=i
 
-for p in pdf:
-    loader=PyPDFLoader(p)
-    doc=loader.load()
+        documents.extend(doc)
 
-    for j in doc:
-        j.metadata["source"]=p
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=200,
+        chunk_overlap=50
+    )
+    chunk = splitter.split_documents(documents)
 
-    documents.extend(doc)
+    embedding=HuggingFaceEmbeddings(
+        model_name="BAAI/bge-small-en-v1.5"
+    )
+    vectore_store=FAISS.from_documents(
+        documents=chunk,
+        embedding=embedding
+    )
+    return vectore_store
 
 
-splitter= RecursiveCharacterTextSplitter(
-    chunk_size=500,
-    chunk_overlap=100
-)
-chunk=splitter.split_documents(documents)
-from langchain_huggingface import HuggingFaceEmbeddings
+vectore_store=create_vector_store()
 
-embedding = HuggingFaceEmbeddings(
-    model_name="BAAI/bge-small-en-v1.5"
-)
-
-vectore_store = FAISS.from_documents(
-    chunk,
-
-    embedding
-    
-)
-
-retrievar=vectore_store.as_retriever(
+retriever=vectore_store.as_retriever(
     search_kwargs={"k":5}
-
 )
+
+
+
 
 prompt = ChatPromptTemplate.from_template(
     """
